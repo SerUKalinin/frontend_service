@@ -1,46 +1,102 @@
-# Getting Started with Create React App
+# Auth Client
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Клиентская часть системы аутентификации, разработанная с использованием React и TypeScript.
 
-## Available Scripts
+## Функциональность
 
-In the project directory, you can run:
+- Вход в систему
+- Регистрация новых пользователей
+- Подтверждение email
+- Сброс пароля
+- Защищенные маршруты
+- Адаптивный дизайн
 
-### `npm start`
+## Технологии
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- React 18
+- TypeScript
+- React Router v6
+- React Hook Form
+- Yup для валидации
+- Axios для HTTP-запросов
+- Tailwind CSS для стилизации
+- React Toastify для уведомлений
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Требования
 
-### `npm test`
+- Node.js 16+
+- npm 7+
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Установка
 
-### `npm run build`
+1. Клонируйте репозиторий:
+```bash
+git clone <repository-url>
+cd auth-client
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. Установите зависимости:
+```bash
+npm install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Создайте файл `.env` в корневой директории и добавьте необходимые переменные окружения:
+```env
+REACT_APP_API_URL=http://localhost:8080/auth
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Запуск
 
-### `npm run eject`
+Для запуска в режиме разработки:
+```bash
+npm start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Приложение будет доступно по адресу [http://localhost:3000](http://localhost:3000)
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Сборка
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Для создания production-сборки:
+```bash
+npm run build
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Структура проекта
 
-## Learn More
+```
+src/
+  ├── components/
+  │   └── auth/
+  │       ├── LoginForm.tsx
+  │       ├── RegisterForm.tsx
+  │       ├── VerifyEmailForm.tsx
+  │       ├── ForgotPasswordForm.tsx
+  │       └── ResetPasswordForm.tsx
+  ├── services/
+  │   └── authService.ts
+  ├── types/
+  │   └── auth.ts
+  ├── App.tsx
+  └── index.tsx
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## API Endpoints
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Приложение использует следующие эндпоинты:
+
+- POST `/auth/login` - вход в систему
+- POST `/auth/register-user` - регистрация пользователя
+- POST `/auth/verify-email` - подтверждение email
+- POST `/auth/resend-verification` - повторная отправка кода подтверждения
+- POST `/auth/forgot-password` - запрос на сброс пароля
+- POST `/auth/reset-password` - установка нового пароля
+- GET `/auth/validate` - проверка токена
+- POST `/auth/logout` - выход из системы
+
+## Безопасность
+
+- Все формы защищены от CSRF-атак
+- Пароли валидируются на стороне клиента
+- JWT-токены хранятся в localStorage
+- Защищенные маршруты требуют аутентификации
+- Все API-запросы используют HTTPS
