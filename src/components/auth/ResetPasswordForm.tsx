@@ -92,14 +92,15 @@ const ResetPasswordForm: React.FC = () => {
       
       if (response.jwtToken) {
         localStorage.setItem('jwtToken', response.jwtToken);
+        localStorage.setItem('refreshToken', response.refreshToken);
         toast.success('Пароль успешно изменен!');
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       } else {
         toast.error('Ошибка при получении токена авторизации');
         navigate('/login');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Ошибка при сбросе пароля');
+      toast.error(error.response?.data || 'Ошибка при сбросе пароля');
     }
   };
 
