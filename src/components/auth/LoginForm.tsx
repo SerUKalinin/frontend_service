@@ -23,9 +23,7 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const response = await authService.login(data);
-      localStorage.setItem('jwtToken', response.jwtToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
+      await authService.login(data);
       toast.success('Вход выполнен успешно!');
       navigate('/dashboard');
     } catch (error: any) {

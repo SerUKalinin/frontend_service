@@ -6,7 +6,9 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/auth';
 // Создаем два экземпляра axios: один для публичных запросов, другой для защищенных
 const publicAxios = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 const privateAxios = axios.create({
