@@ -17,13 +17,14 @@ const schema = yup.object({
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
+    mode: 'onChange'
   });
 
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await authService.login(data);
-      localStorage.setItem('token', response.jwtToken);
+      localStorage.setItem('jwtToken', response.jwtToken);
       localStorage.setItem('refreshToken', response.refreshToken);
       toast.success('Вход выполнен успешно!');
       navigate('/dashboard');
@@ -42,7 +43,7 @@ const LoginForm: React.FC = () => {
             label="Логин или Email"
             type="text"
             error={errors.username?.message}
-            {...register('username')}
+            {...register('username', { required: true })}
           />
 
           <Input
@@ -50,7 +51,7 @@ const LoginForm: React.FC = () => {
             label="Пароль"
             type="password"
             error={errors.password?.message}
-            {...register('password')}
+            {...register('password', { required: true })}
           />
 
           <div className="flex items-center justify-between">
