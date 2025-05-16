@@ -24,10 +24,13 @@ const LoginForm: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await authService.login(data);
+      localStorage.setItem('jwtToken', response.jwtToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
       toast.success('Вход выполнен успешно!');
       navigate('/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Ошибка при входе');
+      const errorMessage = error.response?.data || 'Ошибка при входе';
+      toast.error(errorMessage);
     }
   };
 

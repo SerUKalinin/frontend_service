@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import ErrorMessage from './ErrorMessage';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -7,14 +7,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   fullWidth?: boolean;
 }
 
-const Input: React.FC<InputProps> = ({
+const Input = forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   fullWidth = true,
   className = '',
   id,
   ...props
-}) => {
+}, ref) => {
   const inputClasses = `
     px-4 py-2 rounded-lg border border-gray-300
     focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
@@ -32,12 +32,15 @@ const Input: React.FC<InputProps> = ({
       )}
       <input
         id={id}
+        ref={ref}
         className={inputClasses}
         {...props}
       />
       <ErrorMessage message={error || ''} />
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';
 
 export default Input; 
