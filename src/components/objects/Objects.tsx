@@ -153,7 +153,7 @@ const Objects: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsAddModalOpen(true)}
-              className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className="block rounded-md bg-[#4361ee] px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-[#4361ee]/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4361ee]"
             >
               <PlusIcon className="h-5 w-5 inline-block mr-2" />
               Добавить объект

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronUpIcon, ChevronDownIcon, XMarkIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 import type { Object, ObjectsTableProps } from './types';
 import { getObjectTypeName } from './utils';
 import EditButton from './EditButton';
@@ -35,6 +36,7 @@ interface FilterConfig {
 }
 
 const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }) => {
+  const navigate = useNavigate();
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     field: 'name',
     direction: 'asc'
@@ -127,6 +129,10 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
       field,
       direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
+  };
+
+  const handleRowClick = (object: Object) => {
+    navigate(`/objects/${object.id}`);
   };
 
   const SortableHeader: React.FC<{ field: SortField; children: React.ReactNode }> = ({ field, children }) => (
@@ -302,9 +308,15 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredAndSortedObjects.map((object) => (
-              <tr key={object.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {object.name}
+              <tr 
+                key={object.id} 
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleRowClick(object)}
+              >
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <span className="text-[#4361ee] hover:text-[#4361ee]/80">
+                    {object.name}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {getObjectTypeName(object.objectType)}
@@ -324,8 +336,10 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
                   {object.parentId ? objects.find(obj => obj.id === object.parentId)?.name || 'Неизвестно' : '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <EditButton object={object} onEdit={onEdit} />
-                  <DeleteButton object={object} onDelete={onDelete} />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <EditButton object={object} onEdit={onEdit} />
+                    <DeleteButton object={object} onDelete={onDelete} />
+                  </div>
                 </td>
               </tr>
             ))}
