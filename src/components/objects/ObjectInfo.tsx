@@ -9,12 +9,14 @@ import {
   BuildingOffice2Icon
 } from '@heroicons/react/24/outline';
 import ExpandButton from '../common/ExpandButton';
+import ResponsibleUser from './ResponsibleUser';
 
 interface ObjectInfoProps {
   object: Object;
+  onUpdate?: () => void;
 }
 
-const ObjectInfo: React.FC<ObjectInfoProps> = ({ object }) => {
+const ObjectInfo: React.FC<ObjectInfoProps> = ({ object, onUpdate }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const infoItems = [
@@ -39,9 +41,17 @@ const ObjectInfo: React.FC<ObjectInfoProps> = ({ object }) => {
     {
       icon: UserGroupIcon,
       label: 'Ответственный',
-      value: object.responsibleUserFirstName && object.responsibleUserLastName
-        ? `${object.responsibleUserFirstName} ${object.responsibleUserLastName}`
-        : 'Не назначен',
+      value: (
+        <ResponsibleUser
+          objectId={object.id}
+          responsibleUser={object.responsibleUserId ? {
+            id: object.responsibleUserId,
+            firstName: object.responsibleUserFirstName || '',
+            lastName: object.responsibleUserLastName || ''
+          } : null}
+          onUpdate={onUpdate || (() => {})}
+        />
+      ),
       color: 'text-orange-500'
     },
     {

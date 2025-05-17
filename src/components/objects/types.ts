@@ -3,11 +3,14 @@ export interface Object {
   name: string;
   objectType: string;
   parentId: number | null;
+  createdAt: string;
+  createdById: number;
   createdByFirstName: string;
   createdByLastName: string;
+  responsibleUserId: number | null;
   responsibleUserFirstName: string | null;
   responsibleUserLastName: string | null;
-  createdAt: string;
+  responsibleUserRole: string | null;
 }
 
 export interface ObjectsTableProps {

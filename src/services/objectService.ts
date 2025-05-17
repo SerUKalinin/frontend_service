@@ -1,21 +1,8 @@
 import axios from 'axios';
+import { Object } from '../components/objects/types';
 
-// Создаем экземпляр axios с базовым URL
-const api = axios.create({
-  baseURL: 'http://localhost:8080',
-  withCredentials: true
-});
-
-export interface RealEstateObject {
-  id: number;
-  name: string;
-  objectType: string;
-  parentId?: number;
-  createdAt: string;
-  createdById: number;
-  createdByFirstName: string;
-  createdByLastName: string;
-}
+// Настройка базового URL для axios
+axios.defaults.baseURL = 'http://localhost:8080';
 
 class ObjectService {
   private getAuthHeader() {
@@ -25,41 +12,111 @@ class ObjectService {
       return {};
     }
     return {
-      Authorization: `Bearer ${token}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     };
   }
 
-  async getAllObjects(): Promise<RealEstateObject[]> {
-    try {
-      const headers = this.getAuthHeader();
-      console.log('Making request with headers:', headers);
-      
-      const response = await api.get<RealEstateObject[]>('/real-estate-objects', {
-        headers
-      });
-      
-      console.log('Response received:', response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error('Detailed error:', {
-        status: error?.response?.status,
-        statusText: error?.response?.statusText,
-        data: error?.response?.data,
-        headers: error?.response?.headers
-      });
+  private handleAuthError(error: any) {
+    if (error?.response?.status === 401 || error?.response?.status === 403) {
+      console.log('Unauthorized or forbidden access, redirecting to login');
+      localStorage.removeItem('jwtToken');
+      window.location.href = '/login';
+    }
+    throw error;
+  }
 
-      if (error?.response?.status === 401 || error?.response?.status === 403) {
-        console.log('Unauthorized or forbidden access, redirecting to login');
-        localStorage.removeItem('jwtToken');
-        window.location.href = '/login';
-      }
-      
-      throw new Error(
-        error?.response?.data?.message || 
-        error?.message || 
-        'Failed to fetch objects'
+  async getAllObjects(): Promise<Object[]> {
+    try {
+      const response = await axios.get<Object[]>('/real-estate-objects', {
+        headers: this.getAuthHeader()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching objects:', error);
+      this.handleAuthError(error);
+      throw error;
+    }
+  }
+
+  async getObjectById(id: number): Promise<Object> {
+    try {
+      const response = await axios.get<Object>(`/real-estate-objects/${id}`, {
+        headers: this.getAuthHeader()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching object:', error);
+      this.handleAuthError(error);
+      throw error;
+    }
+  }
+
+  async createObject(object: Partial<Object>): Promise<Object> {
+    try {
+      const response = await axios.post<Object>('/real-estate-objects', object, {
+        headers: this.getAuthHeader()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating object:', error);
+      this.handleAuthError(error);
+      throw error;
+    }
+  }
+
+  async updateObject(id: number, object: Partial<Object>): Promise<Object> {
+    try {
+      const response = await axios.put<Object>(`/real-estate-objects/${id}`, object, {
+        headers: this.getAuthHeader()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating object:', error);
+      this.handleAuthError(error);
+      throw error;
+    }
+  }
+
+  async deleteObject(id: number): Promise<void> {
+    try {
+      await axios.delete(`/real-estate-objects/${id}`, {
+        headers: this.getAuthHeader()
+      });
+    } catch (error) {
+      console.error('Error deleting object:', error);
+      this.handleAuthError(error);
+      throw error;
+    }
+  }
+
+  async assignResponsibleUser(objectId: number, userId: number): Promise<Object> {
+    try {
+      const response = await axios.put<Object>(
+        `/real-estate-objects/${objectId}/assign-responsible/${userId}`,
+        {},
+        { headers: this.getAuthHeader() }
       );
+      return response.data;
+    } catch (error) {
+      console.error('Error assigning responsible user:', error);
+      this.handleAuthError(error);
+      throw error;
+    }
+  }
+
+  async removeResponsibleUser(objectId: number): Promise<Object> {
+    try {
+      const response = await axios.put<Object>(
+        `/real-estate-objects/${objectId}/remove-responsible`,
+        {},
+        { headers: this.getAuthHeader() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error removing responsible user:', error);
+      this.handleAuthError(error);
+      throw error;
     }
   }
 }
