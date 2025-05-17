@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -12,14 +12,30 @@ import Button from '../common/Button';
 const schema = yup.object({
   newPassword: yup.string()
     .required('Введите новый пароль')
-    .min(6, 'Пароль должен содержать минимум 6 символов')
+    .min(8, 'Пароль должен содержать минимум 8 символов')
     .matches(/[A-Z]/, 'Пароль должен содержать хотя бы одну заглавную букву')
     .matches(/[a-z]/, 'Пароль должен содержать хотя бы одну строчную букву')
-    .matches(/[0-9]/, 'Пароль должен содержать хотя бы одну цифру'),
+    .matches(/[0-9]/, 'Пароль должен содержать хотя бы одну цифру')
+    .matches(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/, 'Пароль должен содержать хотя бы один специальный символ'),
   confirmPassword: yup.string()
     .required('Подтвердите новый пароль')
     .oneOf([yup.ref('newPassword')], 'Пароли не совпадают')
 }).required();
+
+interface PasswordRequirement {
+  id: string;
+  label: string;
+  regex: RegExp;
+  met: boolean;
+}
+
+const passwordRequirements: PasswordRequirement[] = [
+  { id: 'length', label: 'Минимум 8 символов', regex: /.{8,}/, met: false },
+  { id: 'uppercase', label: 'Хотя бы одна заглавная буква', regex: /[A-Z]/, met: false },
+  { id: 'lowercase', label: 'Хотя бы одна строчная буква', regex: /[a-z]/, met: false },
+  { id: 'number', label: 'Хотя бы одна цифра', regex: /[0-9]/, met: false },
+  { id: 'special', label: 'Хотя бы один специальный символ (!@#$%^&*()_+-=[]{}|;:,.<>?)', regex: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/, met: false }
+];
 
 const ResetPasswordForm: React.FC = () => {
   const navigate = useNavigate();
@@ -27,14 +43,44 @@ const ResetPasswordForm: React.FC = () => {
   const token = searchParams.get('token');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [requirements, setRequirements] = useState<PasswordRequirement[]>(passwordRequirements);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(false);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ResetPasswordFormData>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<ResetPasswordFormData>({
     resolver: yupResolver(schema)
   });
+
+  const watchPassword = watch('newPassword', '');
+  const watchConfirmPassword = watch('confirmPassword', '');
+
+  useEffect(() => {
+    const newRequirements = requirements.map(req => ({
+      ...req,
+      met: req.regex.test(watchPassword)
+    }));
+    setRequirements(newRequirements);
+    
+    const doPasswordsMatch = watchPassword === watchConfirmPassword && watchPassword !== '';
+    setPasswordsMatch(doPasswordsMatch);
+    
+    const isAllRequirementsMet = newRequirements.every(req => req.met);
+    setIsPasswordValid(isAllRequirementsMet && doPasswordsMatch);
+  }, [watchPassword, watchConfirmPassword, requirements]);
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!token) {
       toast.error('Недействительная ссылка для сброса пароля');
+      return;
+    }
+
+    // Проверяем все требования и совпадение паролей перед отправкой
+    const allRequirementsMet = requirements.every(req => req.met);
+    const doPasswordsMatch = data.newPassword === data.confirmPassword && data.newPassword !== '';
+    
+    if (!allRequirementsMet || !doPasswordsMatch) {
+      toast.error('Пароль не соответствует требованиям или пароли не совпадают');
       return;
     }
 
@@ -44,17 +90,17 @@ const ResetPasswordForm: React.FC = () => {
         token
       });
       
-      // Сохраняем JWT токен
       if (response.jwtToken) {
         localStorage.setItem('jwtToken', response.jwtToken);
+        localStorage.setItem('refreshToken', response.refreshToken);
         toast.success('Пароль успешно изменен!');
-        navigate('/dashboard'); // Перенаправляем на дашборд вместо страницы входа
+        navigate('/dashboard', { replace: true });
       } else {
         toast.error('Ошибка при получении токена авторизации');
         navigate('/login');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Ошибка при сбросе пароля');
+      toast.error(error.response?.data || 'Ошибка при сбросе пароля');
     }
   };
 
@@ -94,7 +140,7 @@ const ResetPasswordForm: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[calc(50%+9px)] -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              className="absolute right-3 top-[calc(50%+11px)] -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
             >
               {showPassword ? (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -107,6 +153,51 @@ const ResetPasswordForm: React.FC = () => {
                 </svg>
               )}
             </button>
+          </div>
+
+          <div className="space-y-2 mb-4">
+            <p className="text-sm font-medium text-gray-700">Требования к паролю:</p>
+            <ul className="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
+              {requirements.map((requirement) => (
+                <li
+                  key={requirement.id}
+                  className={`flex items-center text-sm ${
+                    requirement.met ? 'text-green-600' : 'text-gray-500'
+                  }`}
+                >
+                  <span className="mr-2 flex-shrink-0">
+                    {requirement.met ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className="flex-grow">{requirement.label}</span>
+                </li>
+              ))}
+              <li
+                className={`flex items-center text-sm ${
+                  passwordsMatch ? 'text-green-600' : 'text-gray-500'
+                }`}
+              >
+                <span className="mr-2 flex-shrink-0">
+                  {passwordsMatch ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                </span>
+                <span className="flex-grow">Пароли совпадают</span>
+              </li>
+            </ul>
           </div>
 
           <div className="relative">
@@ -138,7 +229,9 @@ const ResetPasswordForm: React.FC = () => {
           <Button
             type="submit"
             isLoading={isSubmitting}
+            disabled={!isPasswordValid || !passwordsMatch}
             fullWidth
+            className={`${(!isPasswordValid || !passwordsMatch) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Сменить пароль
           </Button>

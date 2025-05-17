@@ -6,7 +6,9 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/auth';
 // Создаем два экземпляра axios: один для публичных запросов, другой для защищенных
 const publicAxios = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 const privateAxios = axios.create({
@@ -28,6 +30,49 @@ privateAxios.interceptors.request.use(
   }
 );
 
+// Добавляем флаг для отслеживания состояния выхода
+let isLoggingOut = false;
+
+// Обновляем перехватчик ответов
+privateAxios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Если это запрос на выход или мы уже в процессе выхода, не пытаемся обновить токен
+    if (isLoggingOut || originalRequest.url?.includes('/logout')) {
+      return Promise.reject(error);
+    }
+
+    // Если ошибка 401 и это не повторный запрос
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        // Пытаемся обновить токен
+        const response = await authService.refreshToken();
+        const { jwtToken } = response;
+
+        // Сохраняем новый токен
+        localStorage.setItem('jwtToken', jwtToken);
+
+        // Обновляем заголовок Authorization
+        originalRequest.headers.Authorization = `Bearer ${jwtToken}`;
+
+        // Повторяем оригинальный запрос
+        return privateAxios(originalRequest);
+      } catch (refreshError) {
+        // Если не удалось обновить токен, выходим из системы
+        await authService.logout();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export const authService = {
   // Публичные методы (без токена)
   async register(data: RegisterFormData): Promise<void> {
@@ -38,15 +83,23 @@ export const authService = {
 
   async login(data: LoginFormData): Promise<AuthResponse> {
     const response = await publicAxios.post<AuthResponse>('/login', data);
-    const { jwtToken } = response.data;
+    const { jwtToken, refreshToken } = response.data;
     localStorage.setItem('jwtToken', jwtToken);
+    localStorage.setItem('refreshToken', refreshToken);
     return response.data;
   },
 
   async logout(): Promise<void> {
-    await privateAxios.post('/logout');
-    localStorage.removeItem('jwtToken');
-    localStorage.removeItem('pendingVerificationEmail');
+    try {
+      isLoggingOut = true; // Устанавливаем флаг выхода
+      await privateAxios.post('/logout');
+    } finally {
+      // Очищаем все токены и данные пользователя
+      localStorage.removeItem('jwtToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('pendingVerificationEmail');
+      isLoggingOut = false; // Сбрасываем флаг выхода
+    }
   },
 
   async verifyEmail(code: string): Promise<AuthResponse> {
@@ -107,7 +160,7 @@ export const authService = {
     await privateAxios.post('/change-password', data);
   },
 
-  validateToken: async (token: string): Promise<boolean> => {
+  validateToken: async (): Promise<boolean> => {
     try {
       await privateAxios.get('/validate');
       return true;
