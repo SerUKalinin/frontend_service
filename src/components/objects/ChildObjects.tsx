@@ -9,6 +9,7 @@ import EditButton from './EditButton';
 import DeleteButton from './DeleteButton';
 import EditChildObjectModal from './EditChildObjectModal';
 import DeleteChildObjectModal from './DeleteChildObjectModal';
+import AddChildObjectModal from './AddChildObjectModal';
 import { toast } from 'react-toastify';
 
 interface ChildObjectsProps {
@@ -24,6 +25,7 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
   const [error, setError] = useState<string | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [currentObject, setCurrentObject] = useState<Object | null>(null);
 
   const fetchObjects = async () => {
@@ -58,9 +60,7 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
     try {
       setCurrentObject(null);
       setEditModalOpen(false);
-      // Сначала обновляем список с сервера
       await fetchObjects();
-      // Затем обновляем локальное состояние
       setObjects(prevObjects => 
         prevObjects.map(obj => obj.id === updatedObject.id ? updatedObject : obj)
       );
@@ -82,11 +82,26 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
       toast.success('Объект успешно удален');
       setCurrentObject(null);
       setDeleteModalOpen(false);
-      // Обновляем список объектов после успешного удаления
       await fetchObjects();
     } catch (err) {
       console.error('Error deleting object:', err);
       toast.error('Ошибка при удалении объекта');
+    }
+  };
+
+  const handleAdd = async (objectData: any) => {
+    try {
+      const token = localStorage.getItem('jwtToken');
+      await axios.post('http://localhost:8080/real-estate-objects', objectData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      await fetchObjects();
+    } catch (err) {
+      console.error('Error adding object:', err);
+      throw err;
     }
   };
 
@@ -139,7 +154,7 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
             className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-[#4361ee] hover:bg-[#3651d4] focus:outline-none"
             onClick={(e) => {
               e.stopPropagation();
-              // TODO: Добавить логику создания нового дочернего объекта
+              setAddModalOpen(true);
             }}
           >
             <PlusIcon className="h-4 w-4 mr-1" />
@@ -214,6 +229,14 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
         }}
         onDelete={handleDelete}
         object={currentObject}
+        parentName={parentName}
+      />
+
+      <AddChildObjectModal
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onAdd={handleAdd}
+        parentId={parentId}
         parentName={parentName}
       />
     </div>
