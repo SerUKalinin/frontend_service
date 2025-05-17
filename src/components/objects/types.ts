@@ -13,5 +13,5 @@ export interface Object {
 export interface ObjectsTableProps {
   objects: Object[];
   onEdit: (object: Object) => void;
-  onDelete: (id: number) => void;
+  onDelete: (object: Object) => void;
 } 

@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import PageLayout from '../layout/PageLayout';
 import AddObjectButton from './AddObjectButton';
 import ObjectsTable from './ObjectsTable';
-import { Object } from './types';
+import type { Object } from './types';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import AddObjectModal from './AddObjectModal';
 import EditObjectModal from './EditObjectModal';
+import DeleteObjectModal from './DeleteObjectModal';
 
 const Objects: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedObject, setSelectedObject] = useState<Object | null>(null);
   const [objects, setObjects] = useState<Object[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -100,16 +102,20 @@ const Objects: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
-      toast.success('Объект успешно удален');
-      fetchObjects(); // Обновляем список после удаления
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Ошибка при удалении объекта');
+      setObjects(prev => prev.filter(obj => obj.id !== id));
+    } catch (error: any) {
+      throw error;
     }
   };
 
   const handleEditClick = (object: Object) => {
     setSelectedObject(object);
     setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (object: Object) => {
+    setSelectedObject(object);
+    setIsDeleteModalOpen(true);
   };
 
   if (isLoading) {
@@ -164,7 +170,7 @@ const Objects: React.FC = () => {
             <ObjectsTable 
               objects={objects}
               onEdit={handleEditClick}
-              onDelete={handleDeleteObject}
+              onDelete={handleDeleteClick}
             />
           )}
         </div>
@@ -194,6 +200,16 @@ const Objects: React.FC = () => {
           name: obj.name,
           objectType: obj.objectType
         }))}
+      />
+
+      <DeleteObjectModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedObject(null);
+        }}
+        onDelete={handleDeleteObject}
+        object={selectedObject}
       />
     </PageLayout>
   );

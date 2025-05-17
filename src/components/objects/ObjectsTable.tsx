@@ -329,7 +329,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
                     <PencilIcon className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => onDelete(object.id)}
+                    onClick={() => onDelete(object)}
                     className="text-red-600 hover:text-red-900"
                   >
                     <TrashIcon className="h-5 w-5" />
