@@ -18,12 +18,19 @@ const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
+    mode: 'onChange'
   });
 
   const onSubmit = async (data: LoginFormData) => {
     try {
+
       await authService.login(data);
+
+      const response = await authService.login(data);
+      localStorage.setItem('jwtToken', response.jwtToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+
       toast.success('Вход выполнен успешно!');
       navigate('/dashboard');
     } catch (error: any) {
@@ -33,6 +40,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
+
     <>
       <h2 className="text-xl font-bold text-center mb-3 text-[#1b263b]">Вход в систему</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
@@ -44,12 +52,25 @@ const LoginForm: React.FC = () => {
           {...register('username')}
         />
         <div className="relative">
+
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2 className="auth-title">Вход в систему</h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Input
+            id="username"
+            label="Логин или Email"
+            type="text"
+            error={errors.username?.message}
+            {...register('username', { required: true })}
+          />
+
           <Input
             id="password"
             label="Пароль"
             type={showPassword ? "text" : "password"}
             error={errors.password?.message}
-            {...register('password')}
+            {...register('password', { required: true })}
           />
           <button
             type="button"

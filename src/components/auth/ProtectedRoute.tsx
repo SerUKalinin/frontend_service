@@ -10,6 +10,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [isValidating, setIsValidating] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+  const token = localStorage.getItem('jwtToken');
 
   useEffect(() => {
     let isMounted = true;
