@@ -5,6 +5,7 @@ import PageLayout from '../layout/PageLayout';
 import type { Object } from './types';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import ObjectInfo from './ObjectInfo';
 
 const ObjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -78,51 +79,7 @@ const ObjectDetails: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Основная информация</h2>
-              <dl className="space-y-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Тип объекта</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{object.objectType}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Создан</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {new Date(object.createdAt).toLocaleDateString('ru-RU')}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Создатель</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {`${object.createdByFirstName} ${object.createdByLastName}`}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-
-            <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Дополнительная информация</h2>
-              <dl className="space-y-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Ответственный</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {object.responsibleUserFirstName && object.responsibleUserLastName
-                      ? `${object.responsibleUserFirstName} ${object.responsibleUserLastName}`
-                      : 'Не назначен'}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Родительский объект</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {object.parentId ? 'Есть' : 'Нет'}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </div>
+        <ObjectInfo object={object} />
       </div>
     </PageLayout>
   );
