@@ -58,7 +58,7 @@ const ObjectDetailsLayout: React.FC<ObjectDetailsLayoutProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <ObjectInfo object={object} />
-          {object.id && <ChildObjects parentId={object.id.toString()} />}
+          {object.id && <ChildObjects parentId={object.id.toString()} parentName={object.name} />}
         </div>
         <div className="lg:col-span-1">
           <ObjectTreeMap currentObjectId={object.id.toString()} />
