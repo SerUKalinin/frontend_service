@@ -5,15 +5,18 @@ import ObjectsTable from './ObjectsTable';
 import { Object } from './types';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { PlusIcon } from '@heroicons/react/24/outline';
+import AddObjectModal from './AddObjectModal';
 
 const Objects: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [objects, setObjects] = useState<Object[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchObjects = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const token = localStorage.getItem('jwtToken');
       const response = await axios.get<Object[]>('http://localhost:8080/real-estate-objects', {
         headers: {
@@ -27,7 +30,7 @@ const Objects: React.FC = () => {
       setError(err.response?.data?.message || 'Ошибка при загрузке объектов');
       toast.error(err.response?.data?.message || 'Ошибка при загрузке объектов');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -35,9 +38,31 @@ const Objects: React.FC = () => {
     fetchObjects();
   }, []);
 
-  const handleAddObject = () => {
-    // TODO: Здесь будет логика открытия модального окна или формы добавления объекта
-    console.log('Добавление нового объекта');
+  const handleAddObject = async (objectData: any) => {
+    try {
+      // TODO: Добавить вызов API для создания объекта
+      // const response = await api.createObject(objectData);
+      // setObjects(prev => [...prev, response.data]);
+      
+      // Временная заглушка для демонстрации
+      const newObject: Object = {
+        id: Date.now(),
+        name: objectData.name,
+        objectType: objectData.objectType,
+        parentId: objectData.parentId || undefined,
+        createdById: 1, // Временное значение
+        createdByFirstName: 'Admin',
+        createdByLastName: 'User',
+        responsibleUserId: undefined,
+        responsibleUserFirstName: undefined,
+        responsibleUserLastName: undefined,
+        createdAt: new Date().toISOString()
+      };
+      
+      setObjects(prev => [...prev, newObject]);
+    } catch (error) {
+      throw new Error('Failed to create object');
+    }
   };
 
   const handleEditObject = async (id: number) => {
@@ -61,7 +86,7 @@ const Objects: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <PageLayout>
         <div className="flex justify-center items-center h-64">
@@ -92,7 +117,16 @@ const Objects: React.FC = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-900">Объекты</h1>
-          <AddObjectButton onClick={handleAddObject} />
+          <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              <PlusIcon className="h-5 w-5 inline-block mr-2" />
+              Добавить объект
+            </button>
+          </div>
         </div>
         
         <div className="bg-white shadow rounded-lg p-6">
@@ -109,6 +143,17 @@ const Objects: React.FC = () => {
           )}
         </div>
       </div>
+
+      <AddObjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAdd={handleAddObject}
+        parentObjects={objects.map(obj => ({
+          id: obj.id.toString(),
+          name: obj.name,
+          objectType: obj.objectType
+        }))}
+      />
     </PageLayout>
   );
 };
