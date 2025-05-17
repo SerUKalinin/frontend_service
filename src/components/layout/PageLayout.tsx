@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import SearchBar from '../header/SearchBar';
 import Notifications from '../header/Notifications';
@@ -10,25 +10,6 @@ interface PageLayoutProps {
 
 const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const getPageTitle = () => {
-    const path = location.pathname;
-    switch (path) {
-      case '/':
-        return 'Главная';
-      case '/objects':
-        return 'Объекты';
-      case '/tasks':
-        return 'Задачи';
-      case '/profile':
-        return 'Профиль';
-      case '/admin':
-        return 'Администрирование';
-      default:
-        return 'Главная';
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -45,10 +26,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
       <header className="bg-white shadow-sm">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">{getPageTitle()}</h1>
+            <div className="flex items-center">
+              <SearchBar />
+            </div>
             
             <div className="flex items-center space-x-4">
-              <SearchBar />
               <Notifications />
               <button
                 onClick={handleLogout}

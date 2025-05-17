@@ -75,31 +75,35 @@ const Profile: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-4">Редактирование профиля</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input
-            id="firstName"
-            label="Имя"
-            type="text"
-            error={errors.firstName?.message}
-            {...register('firstName')}
-          />
-          <Input
-            id="lastName"
-            label="Фамилия"
-            type="text"
-            error={errors.lastName?.message}
-            {...register('lastName')}
-          />
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full"
-          >
-            {isSubmitting ? 'Сохранение...' : 'Сохранить изменения'}
-          </Button>
-        </form>
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Профиль</h1>
+        
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-semibold mb-4">Редактирование профиля</h2>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <Input
+              id="firstName"
+              label="Имя"
+              type="text"
+              error={errors.firstName?.message}
+              {...register('firstName')}
+            />
+            <Input
+              id="lastName"
+              label="Фамилия"
+              type="text"
+              error={errors.lastName?.message}
+              {...register('lastName')}
+            />
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? 'Сохранение...' : 'Сохранить изменения'}
+            </Button>
+          </form>
+        </div>
       </div>
     </PageLayout>
   );
