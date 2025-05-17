@@ -40,28 +40,26 @@ const Objects: React.FC = () => {
 
   const handleAddObject = async (objectData: any) => {
     try {
-      // TODO: Добавить вызов API для создания объекта
-      // const response = await api.createObject(objectData);
-      // setObjects(prev => [...prev, response.data]);
+      const token = localStorage.getItem('jwtToken');
+      const response = await axios.post<Object>(
+        'http://localhost:8080/real-estate-objects',
+        {
+          name: objectData.name,
+          objectType: objectData.objectType,
+          parentId: objectData.parentId || null
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
       
-      // Временная заглушка для демонстрации
-      const newObject: Object = {
-        id: Date.now(),
-        name: objectData.name,
-        objectType: objectData.objectType,
-        parentId: objectData.parentId || undefined,
-        createdById: 1, // Временное значение
-        createdByFirstName: 'Admin',
-        createdByLastName: 'User',
-        responsibleUserId: undefined,
-        responsibleUserFirstName: undefined,
-        responsibleUserLastName: undefined,
-        createdAt: new Date().toISOString()
-      };
-      
-      setObjects(prev => [...prev, newObject]);
-    } catch (error) {
-      throw new Error('Failed to create object');
+      setObjects(prev => [...prev, response.data]);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Ошибка при создании объекта');
+      throw error;
     }
   };
 
