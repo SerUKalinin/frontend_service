@@ -6,6 +6,7 @@ import type { Object } from './types';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import ObjectInfo from './ObjectInfo';
+import ChildObjects from './ChildObjects';
 
 const ObjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -80,6 +81,7 @@ const ObjectDetails: React.FC = () => {
         </div>
 
         <ObjectInfo object={object} />
+        {object.id && <ChildObjects parentId={object.id.toString()} />}
       </div>
     </PageLayout>
   );
