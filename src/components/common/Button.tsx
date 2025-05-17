@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   isLoading?: boolean;
   fullWidth?: boolean;
 }
@@ -20,7 +20,8 @@ const Button: React.FC<ButtonProps> = ({
   const variantClasses = {
     primary: 'bg-primary text-white hover:bg-secondary focus:ring-primary',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500',
-    outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white focus:ring-primary'
+    outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white focus:ring-primary',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
