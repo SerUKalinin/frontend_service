@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { User } from '../../services/userService';
 import { userService } from '../../services/userService';
 import { objectService } from '../../services/objectService';
+import { toast } from 'react-toastify';
+import Button from '../common/Button';
 
 interface ResponsibleUserProps {
   objectId: number;
@@ -32,28 +34,23 @@ const ResponsibleUser: React.FC<ResponsibleUserProps> = ({ objectId, responsible
 
   const handleAssign = async () => {
     if (!selectedUserId) return;
-    
-    setIsLoading(true);
     try {
       await objectService.assignResponsibleUser(objectId, selectedUserId);
-      setIsModalOpen(false);
+      toast.success('Ответственный успешно назначен');
       onUpdate();
-    } catch (error) {
-      console.error('Error assigning responsible user:', error);
-    } finally {
-      setIsLoading(false);
+      setIsModalOpen(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Ошибка при назначении ответственного');
     }
   };
 
   const handleRemove = async () => {
-    setIsLoading(true);
     try {
       await objectService.removeResponsibleUser(objectId);
+      toast.success('Ответственный успешно удален');
       onUpdate();
-    } catch (error) {
-      console.error('Error removing responsible user:', error);
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Ошибка при удалении ответственного');
     }
   };
 
