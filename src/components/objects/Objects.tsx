@@ -7,9 +7,12 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import AddObjectModal from './AddObjectModal';
+import EditObjectModal from './EditObjectModal';
 
 const Objects: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedObject, setSelectedObject] = useState<Object | null>(null);
   const [objects, setObjects] = useState<Object[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,9 +66,29 @@ const Objects: React.FC = () => {
     }
   };
 
-  const handleEditObject = async (id: number) => {
-    // TODO: Здесь будет логика редактирования объекта
-    console.log('Редактирование объекта:', id);
+  const handleEditObject = async (id: number, objectData: any) => {
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const response = await axios.put<Object>(
+        `http://localhost:8080/real-estate-objects/${id}`,
+        {
+          name: objectData.name,
+          objectType: objectData.objectType,
+          parentId: objectData.parentId || null
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      setObjects(prev => prev.map(obj => obj.id === id ? response.data : obj));
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Ошибка при обновлении объекта');
+      throw error;
+    }
   };
 
   const handleDeleteObject = async (id: number) => {
@@ -82,6 +105,11 @@ const Objects: React.FC = () => {
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Ошибка при удалении объекта');
     }
+  };
+
+  const handleEditClick = (object: Object) => {
+    setSelectedObject(object);
+    setIsEditModalOpen(true);
   };
 
   if (isLoading) {
@@ -118,7 +146,7 @@ const Objects: React.FC = () => {
           <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <button
               type="button"
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsAddModalOpen(true)}
               className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               <PlusIcon className="h-5 w-5 inline-block mr-2" />
@@ -135,7 +163,7 @@ const Objects: React.FC = () => {
           ) : (
             <ObjectsTable 
               objects={objects}
-              onEdit={handleEditObject}
+              onEdit={handleEditClick}
               onDelete={handleDeleteObject}
             />
           )}
@@ -143,9 +171,24 @@ const Objects: React.FC = () => {
       </div>
 
       <AddObjectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddObject}
+        parentObjects={objects.map(obj => ({
+          id: obj.id.toString(),
+          name: obj.name,
+          objectType: obj.objectType
+        }))}
+      />
+
+      <EditObjectModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedObject(null);
+        }}
+        onEdit={handleEditObject}
+        object={selectedObject}
         parentObjects={objects.map(obj => ({
           id: obj.id.toString(),
           name: obj.name,

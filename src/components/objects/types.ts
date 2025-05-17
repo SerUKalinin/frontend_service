@@ -2,18 +2,16 @@ export interface Object {
   id: number;
   name: string;
   objectType: string;
-  parentId?: number;
-  createdAt: string;
-  createdById: number;
+  parentId: number | null;
   createdByFirstName: string;
   createdByLastName: string;
-  responsibleUserId?: number;
-  responsibleUserFirstName?: string;
-  responsibleUserLastName?: string;
+  responsibleUserFirstName: string | null;
+  responsibleUserLastName: string | null;
+  createdAt: string;
 }
 
 export interface ObjectsTableProps {
   objects: Object[];
-  onEdit: (id: number) => void;
+  onEdit: (object: Object) => void;
   onDelete: (id: number) => void;
 } 
