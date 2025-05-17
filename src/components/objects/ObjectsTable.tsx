@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { PencilIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon, XMarkIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { ChevronUpIcon, ChevronDownIcon, XMarkIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import type { Object, ObjectsTableProps } from './types';
 import { getObjectTypeName } from './utils';
+import EditButton from './EditButton';
+import DeleteButton from './DeleteButton';
 
 const statusColors = {
   active: 'bg-green-100 text-green-800',
@@ -322,18 +324,8 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
                   {object.parentId ? objects.find(obj => obj.id === object.parentId)?.name || 'Неизвестно' : '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => onEdit(object)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => onDelete(object)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                  <EditButton object={object} onEdit={onEdit} />
+                  <DeleteButton object={object} onDelete={onDelete} />
                 </td>
               </tr>
             ))}
