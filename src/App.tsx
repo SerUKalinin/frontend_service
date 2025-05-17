@@ -14,6 +14,7 @@ import Profile from './components/profile/Profile';
 import Admin from './components/admin/Admin';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Sidebar from './components/Sidebar';
+import ObjectDetails from './components/objects/ObjectDetails';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Здесь в реальном приложении нужно получать статус админа и информацию о пользователе из контекста или хранилища
@@ -60,6 +61,16 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <Layout>
                   <Objects />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/objects/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ObjectDetails />
                 </Layout>
               </ProtectedRoute>
             }

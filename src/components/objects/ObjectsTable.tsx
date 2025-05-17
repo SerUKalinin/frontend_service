@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { PencilIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon, XMarkIcon, FunnelIcon } from '@heroicons/react/24/outline';
-import { ObjectsTableProps } from './types';
+import { ChevronUpIcon, ChevronDownIcon, XMarkIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
+import type { Object, ObjectsTableProps } from './types';
 import { getObjectTypeName } from './utils';
+import EditButton from './EditButton';
+import DeleteButton from './DeleteButton';
 
 const statusColors = {
   active: 'bg-green-100 text-green-800',
@@ -15,7 +18,7 @@ const statusLabels = {
   maintenance: 'На обслуживании'
 };
 
-type SortField = 'name' | 'objectType' | 'createdBy' | 'responsibleUser' | 'createdAt';
+type SortField = 'name' | 'objectType' | 'createdBy' | 'responsibleUser' | 'createdAt' | 'parentId';
 type SortDirection = 'asc' | 'desc';
 
 interface SortConfig {
@@ -29,9 +32,11 @@ interface FilterConfig {
   createdBy: string;
   responsibleUser: string;
   createdAt: string;
+  parentId: string;
 }
 
 const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }) => {
+  const navigate = useNavigate();
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     field: 'name',
     direction: 'asc'
@@ -42,12 +47,13 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
     objectType: '',
     createdBy: '',
     responsibleUser: '',
-    createdAt: ''
+    createdAt: '',
+    parentId: ''
   });
 
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
 
-  const getSortValue = (object: any, field: SortField) => {
+  const getSortValue = (object: Object, field: SortField) => {
     switch (field) {
       case 'name':
         return object.name;
@@ -61,6 +67,8 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
           : 'Не назначен';
       case 'createdAt':
         return new Date(object.createdAt).getTime();
+      case 'parentId':
+        return object.parentId ? objects.find(obj => obj.id === object.parentId)?.name || 'Неизвестно' : '-';
       default:
         return '';
     }
@@ -79,7 +87,8 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
       objectType: '',
       createdBy: '',
       responsibleUser: '',
-      createdAt: ''
+      createdAt: '',
+      parentId: ''
     });
   };
 
@@ -92,8 +101,9 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
         ? `${object.responsibleUserFirstName} ${object.responsibleUserLastName}`
         : 'Не назначен').toLowerCase().includes(filters.responsibleUser.toLowerCase());
       const dateMatch = new Date(object.createdAt).toLocaleDateString('ru-RU').includes(filters.createdAt);
+      const parentMatch = filters.parentId ? object.parentId?.toString() === filters.parentId : true;
 
-      return nameMatch && typeMatch && createdByMatch && responsibleMatch && dateMatch;
+      return nameMatch && typeMatch && createdByMatch && responsibleMatch && dateMatch && parentMatch;
     })
     .sort((a, b) => {
       const valueA = getSortValue(a, sortConfig.field);
@@ -105,9 +115,13 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
           : valueB.localeCompare(valueA, 'ru');
       }
 
-      return sortConfig.direction === 'asc'
-        ? valueA - valueB
-        : valueB - valueA;
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return sortConfig.direction === 'asc'
+          ? valueA - valueB
+          : valueB - valueA;
+      }
+
+      return 0;
     });
 
   const handleSort = (field: SortField) => {
@@ -115,6 +129,10 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
       field,
       direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
+  };
+
+  const handleRowClick = (object: Object) => {
+    navigate(`/objects/${object.id}`);
   };
 
   const SortableHeader: React.FC<{ field: SortField; children: React.ReactNode }> = ({ field, children }) => (
@@ -239,6 +257,24 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
                 placeholder="Поиск по дате..."
               />
             </div>
+            <div>
+              <label htmlFor="parentFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                Родительский объект
+              </label>
+              <select
+                id="parentFilter"
+                value={filters.parentId}
+                onChange={(e) => handleFilterChange('parentId', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="">Выберите родительский объект</option>
+                {objects.map(obj => (
+                  <option key={obj.id} value={obj.id}>
+                    {obj.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -262,6 +298,9 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
               <SortableHeader field="createdAt">
                 Дата создания
               </SortableHeader>
+              <SortableHeader field="parentId">
+                Родительский объект
+              </SortableHeader>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Действия
               </th>
@@ -269,9 +308,15 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredAndSortedObjects.map((object) => (
-              <tr key={object.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {object.name}
+              <tr 
+                key={object.id} 
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleRowClick(object)}
+              >
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <span className="text-[#4361ee] hover:text-[#4361ee]/80">
+                    {object.name}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {getObjectTypeName(object.objectType)}
@@ -287,19 +332,14 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(object.createdAt).toLocaleDateString('ru-RU')}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {object.parentId ? objects.find(obj => obj.id === object.parentId)?.name || 'Неизвестно' : '-'}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => onEdit(object.id)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => onDelete(object.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <EditButton object={object} onEdit={onEdit} />
+                    <DeleteButton object={object} onDelete={onDelete} />
+                  </div>
                 </td>
               </tr>
             ))}
