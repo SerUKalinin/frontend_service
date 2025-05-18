@@ -8,6 +8,7 @@ import {
     ClockIcon, 
     ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
 
 interface TaskListProps {
     tasks: Task[];
@@ -290,9 +291,12 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskClick, onStatusChange 
                         {filteredAndSortedTasks.map((task) => (
                             <tr key={task.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <span className="text-[#4361ee] hover:text-[#4361ee]/80">
+                                    <Link
+                                        to={`/tasks/${task.id}`}
+                                        className="text-[#4361ee] hover:text-[#4361ee]/80 underline cursor-pointer"
+                                    >
                                         {task.title}
-                                    </span>
+                                    </Link>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status)}`}>

@@ -113,17 +113,17 @@ const Tasks: React.FC = () => {
         );
     }
 
-    return (
-        <PageLayout>
-            <div className="space-y-6">
+  return (
+    <PageLayout>
+      <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-semibold text-gray-900">Задачи</h1>
                     <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
                         <AddTaskButton onClick={() => setIsAddModalOpen(true)} />
                     </div>
                 </div>
-                
-                <div className="bg-white shadow rounded-lg p-6">
+        
+        <div className="bg-white shadow rounded-lg p-6">
                     {tasks.length === 0 ? (
                         <div className="text-center text-gray-500 py-8">
                             Задачи не найдены
@@ -134,16 +134,16 @@ const Tasks: React.FC = () => {
                             onStatusChange={handleStatusChange}
                         />
                     )}
-                </div>
-            </div>
+        </div>
+      </div>
 
             <AddTaskModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onTaskAdded={handleAddTask}
             />
-        </PageLayout>
-    );
+    </PageLayout>
+  );
 };
 
 export default Tasks; 
