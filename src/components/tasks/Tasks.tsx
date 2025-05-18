@@ -57,34 +57,9 @@ const Tasks: React.FC = () => {
         }
     };
 
-    const handleAddTask = async (taskData: {
-        title: string;
-        description: string;
-        deadline: string;
-        realEstateObjectId: number;
-    }) => {
-        try {
-            if (!authService.isAuthenticated()) {
-                throw new Error('Требуется авторизация');
-            }
-
-            const response = await api.post<Task>('/tasks', {
-                title: taskData.title,
-                description: taskData.description || null,
-                deadline: taskData.deadline ? new Date(taskData.deadline).toISOString() : null,
-                realEstateObjectId: taskData.realEstateObjectId
-            });
-
-            setTasks(prev => [...prev, response.data]);
-            setIsAddModalOpen(false);
-        } catch (err: any) {
-            console.error('Error creating task:', err);
-            if (err?.response?.status === 403) {
-                setError('Доступ запрещен. Пожалуйста, войдите в систему.');
-            } else {
-                setError(err.response?.data?.message || 'Ошибка при создании задачи');
-            }
-        }
+    const handleAddTask = (createdTask: Task) => {
+        setTasks(prev => [...prev, createdTask]);
+        setIsAddModalOpen(false);
     };
 
     if (loading) {

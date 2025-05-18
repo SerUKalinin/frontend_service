@@ -10,12 +10,14 @@ interface ObjectDetailsLayoutProps {
   object: Object | null;
   isLoading: boolean;
   error: string | null;
+  onObjectChange: () => void;
 }
 
 const ObjectDetailsLayout: React.FC<ObjectDetailsLayoutProps> = ({ 
   object, 
   isLoading, 
-  error 
+  error,
+  onObjectChange
 }) => {
   const navigate = useNavigate();
 
@@ -57,7 +59,7 @@ const ObjectDetailsLayout: React.FC<ObjectDetailsLayoutProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <ObjectInfo object={object} />
+          <ObjectInfo object={object} onObjectChange={onObjectChange} />
           {object.id && <ChildObjects parentId={object.id.toString()} parentName={object.name} />}
         </div>
         <div className="lg:col-span-1">
