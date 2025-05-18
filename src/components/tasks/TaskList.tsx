@@ -9,6 +9,7 @@ import {
     ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import TaskListFilters from './TaskListFilters';
 
 interface TaskListProps {
     tasks: Task[];
@@ -198,73 +199,12 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskClick, onStatusChange 
                 </button>
             </div>
 
-            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isFiltersVisible ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div>
-                            <label htmlFor="titleFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                                Название
-                            </label>
-                            <input
-                                type="text"
-                                id="titleFilter"
-                                value={filters.title}
-                                onChange={(e) => handleFilterChange('title', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Поиск по названию..."
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                                Статус
-                            </label>
-                            <input
-                                type="text"
-                                id="statusFilter"
-                                value={filters.status}
-                                onChange={(e) => handleFilterChange('status', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Поиск по статусу..."
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="createdAtFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                                Дата создания
-                            </label>
-                            <input
-                                type="text"
-                                id="createdAtFilter"
-                                value={filters.createdAt}
-                                onChange={(e) => handleFilterChange('createdAt', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Поиск по дате создания..."
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="deadlineFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                                Срок выполнения
-                            </label>
-                            <input
-                                type="text"
-                                id="deadlineFilter"
-                                value={filters.deadline}
-                                onChange={(e) => handleFilterChange('deadline', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Поиск по сроку..."
-                            />
-                        </div>
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                        <button
-                            onClick={clearFilters}
-                            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            <XMarkIcon className="h-4 w-4 mr-2" />
-                            Очистить фильтры
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <TaskListFilters
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onClearFilters={clearFilters}
+                isVisible={isFiltersVisible}
+            />
 
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
