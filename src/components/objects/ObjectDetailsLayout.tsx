@@ -1,11 +1,11 @@
 import React from 'react';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import type { Object } from './types';
 import ObjectInfo from './ObjectInfo';
 import ChildObjects from './ChildObjects';
 import ObjectTreeMap from './ObjectTreeMap';
 import ObjectTasks from './ObjectTasks';
+import ObjectHeader from './ObjectHeader';
 
 interface ObjectDetailsLayoutProps {
   object: Object | null;
@@ -46,17 +46,7 @@ const ObjectDetailsLayout: React.FC<ObjectDetailsLayoutProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate('/objects')}
-            className="mr-4 p-2 rounded-full hover:bg-gray-100"
-          >
-            <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
-          </button>
-          <h1 className="text-2xl font-semibold text-gray-900">{object.name}</h1>
-        </div>
-      </div>
+      <ObjectHeader object={object} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
