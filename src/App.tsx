@@ -26,7 +26,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="flex min-h-screen">
       <Sidebar isAdmin={isAdmin} userName={userName} userRole={userRole} />
-      <div className="flex-1">
+      <div className="flex-1 ml-[280px]">
         {children}
       </div>
     </div>
