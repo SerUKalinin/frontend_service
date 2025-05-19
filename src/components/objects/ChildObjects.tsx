@@ -159,23 +159,10 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
       <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div 
-              className="flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#4361ee] hover:bg-gray-50 transition-colors cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                setAddModalOpen(true);
-              }}
-            >
-              <div className="flex flex-col items-center text-center">
-                <PlusIcon className="h-8 w-8 text-gray-400 mb-2" />
-                <span className="text-sm font-medium text-gray-600">Добавить объект</span>
-              </div>
-            </div>
-
             {objects.map((obj) => (
               <div 
                 key={obj.id}
-                className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 h-[100px]"
               >
                 <div 
                   className="flex-1 min-w-0 cursor-pointer"
@@ -203,6 +190,19 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
                 </div>
               </div>
             ))}
+
+            <div 
+              className="flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#4361ee] hover:bg-gray-50 transition-colors cursor-pointer h-[100px]"
+              onClick={(e) => {
+                e.stopPropagation();
+                setAddModalOpen(true);
+              }}
+            >
+              <div className="flex flex-col items-center text-center">
+                <PlusIcon className="h-8 w-8 text-gray-400 mb-2" />
+                <span className="text-sm font-medium text-gray-600">Добавить объект</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
