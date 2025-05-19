@@ -5,6 +5,7 @@ import type { Object } from './types';
 import ObjectInfo from './ObjectInfo';
 import ChildObjects from './ChildObjects';
 import ObjectTreeMap from './ObjectTreeMap';
+import ObjectTasks from './ObjectTasks';
 
 interface ObjectDetailsLayoutProps {
   object: Object | null;
@@ -61,6 +62,7 @@ const ObjectDetailsLayout: React.FC<ObjectDetailsLayoutProps> = ({
         <div className="lg:col-span-2 space-y-6">
           <ObjectInfo object={object} onObjectChange={onObjectChange} />
           {object.id && <ChildObjects parentId={object.id.toString()} parentName={object.name} />}
+          {object.id && <ObjectTasks objectId={object.id.toString()} objectName={object.name} />}
         </div>
         <div className="lg:col-span-1">
           <ObjectTreeMap currentObjectId={object.id.toString()} />
