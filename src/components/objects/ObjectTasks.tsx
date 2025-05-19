@@ -94,6 +94,24 @@ const ObjectTasks: React.FC<ObjectTasksProps> = ({ objectId, objectName }) => {
     }
   };
 
+  const getStatusLabel = (status: string | undefined) => {
+    if (!status) return 'Неизвестно';
+    switch (status.toLowerCase()) {
+      case 'new':
+        return 'Новая';
+      case 'in_progress':
+        return 'В работе';
+      case 'expired':
+        return 'Просрочена';
+      case 'urgent':
+        return 'Срочная';
+      case 'completed':
+        return 'Завершена';
+      default:
+        return status;
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white shadow rounded-lg p-4">
@@ -158,7 +176,7 @@ const ObjectTasks: React.FC<ObjectTasksProps> = ({ objectId, objectName }) => {
                         {task.title}
                       </Link>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                        {task.status}
+                        {getStatusLabel(task.status)}
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-gray-500">{task.description}</p>
