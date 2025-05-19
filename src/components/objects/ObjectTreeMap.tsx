@@ -5,6 +5,7 @@ import type { Object } from './types';
 import { getObjectTypeName } from './utils';
 import { ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import BackToParentButton from './BackToParentButton';
+import ObjectTaskStatusBadges, { TaskStatusStats } from './ObjectTaskStatusBadges';
 
 interface ObjectTreeMapProps {
   currentObjectId: string;
@@ -18,6 +19,7 @@ interface TreeNode {
   isExpanded?: boolean;
   isLoading?: boolean;
   hasChildren: boolean;
+  taskStats?: TaskStatusStats;
 }
 
 const ObjectTreeMap: React.FC<ObjectTreeMapProps> = ({ currentObjectId }) => {
@@ -27,6 +29,21 @@ const ObjectTreeMap: React.FC<ObjectTreeMapProps> = ({ currentObjectId }) => {
   const [parentObject, setParentObject] = useState<{ id: string; name: string } | null>(null);
   const navigate = useNavigate();
 
+  const fetchTaskStats = async (objectId: string): Promise<TaskStatusStats> => {
+    const token = localStorage.getItem('jwtToken');
+    try {
+      const response = await axios.get(`http://localhost:8080/tasks/object/${objectId}/status-stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data as TaskStatusStats;
+    } catch (e) {
+      return {};
+    }
+  };
+
   const fetchChildren = async (parentId: string): Promise<TreeNode[]> => {
     const token = localStorage.getItem('jwtToken');
     const response = await axios.get<Object[]>(`http://localhost:8080/real-estate-objects/${parentId}/children`, {
@@ -35,13 +52,17 @@ const ObjectTreeMap: React.FC<ObjectTreeMapProps> = ({ currentObjectId }) => {
         'Content-Type': 'application/json'
       }
     });
-    return response.data.map(obj => ({
-      id: obj.id.toString(),
-      name: obj.name,
-      objectType: obj.objectType,
-      children: [],
-      isExpanded: false,
-      hasChildren: false
+    return Promise.all(response.data.map(async obj => {
+      const stats = await fetchTaskStats(obj.id.toString());
+      return {
+        id: obj.id.toString(),
+        name: obj.name,
+        objectType: obj.objectType,
+        children: [],
+        isExpanded: false,
+        hasChildren: false,
+        taskStats: stats
+      };
     }));
   };
 
@@ -205,15 +226,13 @@ const ObjectTreeMap: React.FC<ObjectTreeMapProps> = ({ currentObjectId }) => {
             </button>
           )}
           <div 
-            className="flex-1 ml-1"
+            className="flex-1 ml-1 flex items-center gap-2"
             onClick={() => handleNodeClick(node.id)}
           >
             <div className="text-sm font-medium truncate">
               {node.name}
             </div>
-            <div className={`text-xs ${isCurrentNode ? 'text-white' : 'text-gray-500'}`}>
-              {getObjectTypeName(node.objectType)}
-            </div>
+            {node.taskStats && <ObjectTaskStatusBadges stats={node.taskStats} />}
           </div>
         </div>
         {node.isExpanded && node.children && (
