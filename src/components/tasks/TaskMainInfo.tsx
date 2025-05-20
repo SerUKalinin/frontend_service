@@ -6,6 +6,7 @@ import TaskResponsibleUserManager from './TaskResponsibleUserManager';
 import TakeInWorkButton from './TakeInWorkButton';
 import { userService } from '../../services/userService';
 import CompleteTaskButton from './CompleteTaskButton';
+import TakeTaskButton from './TakeTaskButton';
 
 interface TaskMainInfoProps {
   task: {
@@ -145,6 +146,12 @@ const TaskMainInfo: React.FC<TaskMainInfoProps> = ({ task, onTaskChange }) => {
       </div>
       <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="p-4">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">{task.title}</h1>
+            {task.status === 'NEW' && (
+              <TakeTaskButton taskId={task.id} onTaskChange={onTaskChange} />
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {infoItems.map((item, index) => (
               <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
