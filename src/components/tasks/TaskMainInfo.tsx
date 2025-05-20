@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { CheckCircleIcon, ClockIcon, ExclamationCircleIcon, CalendarIcon, UserIcon } from '@heroicons/react/24/outline';
 import { api } from '../../services/api';
 import TaskResponsibleUserManager from './TaskResponsibleUserManager';
+import TakeInWorkButton from './TakeInWorkButton';
+import { userService } from '../../services/userService';
+import CompleteTaskButton from './CompleteTaskButton';
 
 interface TaskMainInfoProps {
   task: {
@@ -57,6 +60,7 @@ const getStatusLabel = (status: string) => {
 const TaskMainInfo: React.FC<TaskMainInfoProps> = ({ task, onTaskChange }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [objectName, setObjectName] = useState<string | null>(task.realEstateObjectName || null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     if (!objectName && task.realEstateObjectId) {
@@ -69,6 +73,10 @@ const TaskMainInfo: React.FC<TaskMainInfoProps> = ({ task, onTaskChange }) => {
         });
     }
   }, [objectName, task.realEstateObjectId]);
+
+  useEffect(() => {
+    userService.getCurrentUser().then(setUser).catch(() => setUser(null));
+  }, []);
 
   const infoItems = [
     {
@@ -153,6 +161,12 @@ const TaskMainInfo: React.FC<TaskMainInfoProps> = ({ task, onTaskChange }) => {
           <div className="mt-6">
             <div className="text-gray-700 font-semibold mb-1">Описание задачи:</div>
             <div className="bg-gray-50 rounded p-3 min-h-[40px]">{task.description || <span className="text-gray-400">Нет описания</span>}</div>
+          </div>
+          <div className="flex flex-row items-center">
+            {user && (
+              <TakeInWorkButton task={task} user={user} onTaskChange={onTaskChange} />
+            )}
+            <CompleteTaskButton task={task} onTaskChange={onTaskChange} />
           </div>
         </div>
       </div>
