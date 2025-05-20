@@ -135,9 +135,9 @@ const ObjectTasks: React.FC<ObjectTasksProps> = ({ objectId, objectName }) => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg">
+    <div className="bg-white shadow rounded-lg p-4">
       <div 
-        className="p-4 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50"
+        className="border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-50 pb-4"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center space-x-2">
@@ -153,62 +153,58 @@ const ObjectTasks: React.FC<ObjectTasksProps> = ({ objectId, objectName }) => {
           />
         </div>
       </div>
-
-      <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        <div className="p-4">
-          {tasks.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
-              Задачи отсутствуют
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {tasks.map((task) => (
-                <div 
-                  key={task.id}
-                  className="flex items-start space-x-4 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <Link 
-                        to={`/tasks/${task.id}`}
-                        className="text-sm font-medium text-[#4361ee] hover:text-[#3651d4] hover:underline"
-                      >
-                        {task.title}
-                      </Link>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                        {getStatusLabel(task.status)}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-gray-500">{task.description}</p>
-                    <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-                      <span className={`font-medium ${getPriorityColor(task.priority)}`}>
-                        Приоритет: {task.priority}
-                      </span>
-                      <span>Срок: {task.deadline ? new Date(task.deadline).toLocaleDateString('ru-RU') : 'Не указан'}</span>
-                      <span>
-                        Ответственный: {task.responsibleUserFirstName && task.responsibleUserLastName 
-                          ? `${task.responsibleUserFirstName} ${task.responsibleUserLastName}`
-                          : 'Не назначен'}
-                      </span>
-                    </div>
+      <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}> 
+        {tasks.length === 0 ? (
+          <div className="text-center py-4 text-gray-500">
+            Задачи отсутствуют
+          </div>
+        ) : (
+          <div className="space-y-4 mt-4">
+            {tasks.map((task) => (
+              <div 
+                key={task.id}
+                className="flex items-start space-x-4 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <Link 
+                      to={`/tasks/${task.id}`}
+                      className="text-sm font-medium text-[#4361ee] hover:text-[#3651d4] hover:underline"
+                    >
+                      {task.title}
+                    </Link>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                      {getStatusLabel(task.status)}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm text-gray-500">{task.description}</p>
+                  <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+                    <span className={`font-medium ${getPriorityColor(task.priority)}`}>
+                      Приоритет: {task.priority}
+                    </span>
+                    <span>Срок: {task.deadline ? new Date(task.deadline).toLocaleDateString('ru-RU') : 'Не указан'}</span>
+                    <span>
+                      Ответственный: {task.responsibleUserFirstName && task.responsibleUserLastName 
+                        ? `${task.responsibleUserFirstName} ${task.responsibleUserLastName}`
+                        : 'Не назначен'}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-          <div className="mt-4">
-            <AddTaskButton onClick={() => setIsAddModalOpen(true)} />
+              </div>
+            ))}
           </div>
+        )}
+        <div className="mt-4">
+          <AddTaskButton onClick={() => setIsAddModalOpen(true)} />
         </div>
+        <AddObjectTaskModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onTaskAdded={handleTaskAdded}
+          objectId={objectId}
+          objectName={objectName}
+        />
       </div>
-
-      <AddObjectTaskModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onTaskAdded={handleTaskAdded}
-        objectId={objectId}
-        objectName={objectName}
-      />
     </div>
   );
 };
