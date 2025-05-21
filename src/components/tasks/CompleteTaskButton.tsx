@@ -8,6 +8,7 @@ interface CompleteTaskButtonProps {
     description: string;
     status: string;
     deadline: string;
+    realEstateObjectId: number;
     responsibleUserFirstName?: string;
     responsibleUserLastName?: string;
   };
@@ -26,7 +27,8 @@ const CompleteTaskButton: React.FC<CompleteTaskButtonProps> = ({ task, onTaskCha
         title: task.title,
         description: task.description,
         status: 'COMPLETED',
-        deadline: task.deadline
+        deadline: task.deadline,
+        realEstateObjectId: task.realEstateObjectId
       });
       onTaskChange && onTaskChange();
     } catch (err) {

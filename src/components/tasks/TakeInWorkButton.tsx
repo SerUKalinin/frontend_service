@@ -8,6 +8,7 @@ interface TakeInWorkButtonProps {
     description: string;
     status: string;
     deadline: string;
+    realEstateObjectId: number;
     responsibleUserFirstName?: string;
     responsibleUserLastName?: string;
   };
@@ -30,12 +31,26 @@ const TakeInWorkButton: React.FC<TakeInWorkButtonProps> = ({ task, user, onTaskC
       setLoading(true);
       // 1. Назначить себя ответственным
       await api.put(`/tasks/${task.id}/assign-responsible`, { userId: user.id });
+      
+      // Проверяем и корректируем дедлайн
+      let deadline = task.deadline;
+      const deadlineDate = new Date(deadline);
+      const now = new Date();
+      
+      // Если дедлайн в прошлом, устанавливаем его на завтра
+      if (deadlineDate < now) {
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        deadline = tomorrow.toISOString();
+      }
+
       // 2. Сменить статус
       await api.put(`/tasks/${task.id}`, {
         title: task.title,
         description: task.description,
         status: 'IN_PROGRESS',
-        deadline: task.deadline
+        deadline: deadline,
+        realEstateObjectId: task.realEstateObjectId
       });
       onTaskChange && onTaskChange();
     } catch (err) {
