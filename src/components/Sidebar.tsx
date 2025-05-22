@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin, userName = 'Пользова
   };
 
   return (
-    <aside className="w-[280px] h-screen bg-[var(--sidebar-bg)] text-white p-8 flex flex-col shadow-[2px_0_10px_rgba(0,0,0,0.1)] transition-all duration-300">
+    <aside className="fixed top-0 left-0 w-[280px] h-screen bg-[var(--sidebar-bg)] text-white p-8 flex flex-col shadow-[2px_0_10px_rgba(0,0,0,0.1)] transition-all duration-300 z-50">
       {/* Шапка сайдбара */}
       <div className="flex items-center mb-8">
         <BuildingOfficeIcon className="h-8 w-8 text-white mr-3" />

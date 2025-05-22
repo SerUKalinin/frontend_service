@@ -15,6 +15,7 @@ import Admin from './components/admin/Admin';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import ObjectDetails from './components/objects/ObjectDetails';
+import TaskDetailsPage from './components/tasks/TaskDetailsPage';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Здесь в реальном приложении нужно получать статус админа и информацию о пользователе из контекста или хранилища
@@ -25,7 +26,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="flex min-h-screen">
       <Sidebar isAdmin={isAdmin} userName={userName} userRole={userRole} />
-      <div className="flex-1">
+      <div className="flex-1 ml-[280px]">
         {children}
       </div>
     </div>
@@ -81,6 +82,16 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <Layout>
                   <Tasks />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TaskDetailsPage />
                 </Layout>
               </ProtectedRoute>
             }

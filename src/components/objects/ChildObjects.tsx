@@ -150,16 +150,6 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <button
-            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-[#4361ee] hover:bg-[#3651d4] focus:outline-none"
-            onClick={(e) => {
-              e.stopPropagation();
-              setAddModalOpen(true);
-            }}
-          >
-            <PlusIcon className="h-4 w-4 mr-1" />
-            Добавить
-          </button>
           <ExpandButton 
             isExpanded={isExpanded}
             onClick={handleExpandClick}
@@ -168,45 +158,52 @@ const ChildObjects: React.FC<ChildObjectsProps> = ({ parentId, parentName }) => 
       </div>
       <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="p-4">
-          {objects.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
-              Дочерние объекты отсутствуют
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {objects.map((obj) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {objects.map((obj) => (
+              <div 
+                key={obj.id}
+                className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 h-[100px]"
+              >
                 <div 
-                  key={obj.id}
-                  className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 min-w-0 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/objects/${obj.id}`);
+                  }}
                 >
-                  <div 
-                    className="flex-1 min-w-0 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/objects/${obj.id}`);
-                    }}
-                  >
-                    <p className="text-sm font-medium text-[#4361ee] truncate hover:text-[#3651d4]">
-                      {obj.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {getObjectTypeName(obj.objectType)}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <EditButton
-                      object={obj}
-                      onEdit={handleEditClick}
-                    />
-                    <DeleteButton
-                      object={obj}
-                      onDelete={handleDeleteClick}
-                    />
-                  </div>
+                  <p className="text-sm font-medium text-[#4361ee] truncate hover:text-[#3651d4]">
+                    {obj.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {getObjectTypeName(obj.objectType)}
+                  </p>
                 </div>
-              ))}
+                <div className="flex items-center space-x-1">
+                  <EditButton
+                    object={obj}
+                    onEdit={handleEditClick}
+                  />
+                  <DeleteButton
+                    object={obj}
+                    onDelete={handleDeleteClick}
+                  />
+                </div>
+              </div>
+            ))}
+
+            <div 
+              className="flex items-center justify-center p-3 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#4361ee] hover:bg-gray-50 transition-colors cursor-pointer h-[100px]"
+              onClick={(e) => {
+                e.stopPropagation();
+                setAddModalOpen(true);
+              }}
+            >
+              <div className="flex flex-col items-center text-center">
+                <PlusIcon className="h-8 w-8 text-gray-400 mb-2" />
+                <span className="text-sm font-medium text-gray-600">Добавить объект</span>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 

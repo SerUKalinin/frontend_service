@@ -9,12 +9,14 @@ import {
   BuildingOffice2Icon
 } from '@heroicons/react/24/outline';
 import ExpandButton from '../common/ExpandButton';
+import ResponsibleUserManager from './ResponsibleUserManager';
 
 interface ObjectInfoProps {
   object: Object;
+  onObjectChange?: () => void;
 }
 
-const ObjectInfo: React.FC<ObjectInfoProps> = ({ object }) => {
+const ObjectInfo: React.FC<ObjectInfoProps> = ({ object, onObjectChange }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const infoItems = [
@@ -39,9 +41,14 @@ const ObjectInfo: React.FC<ObjectInfoProps> = ({ object }) => {
     {
       icon: UserGroupIcon,
       label: 'Ответственный',
-      value: object.responsibleUserFirstName && object.responsibleUserLastName
-        ? `${object.responsibleUserFirstName} ${object.responsibleUserLastName}`
-        : 'Не назначен',
+      value: (
+        <ResponsibleUserManager
+          responsibleUserFirstName={object.responsibleUserFirstName || undefined}
+          responsibleUserLastName={object.responsibleUserLastName || undefined}
+          objectId={object.id}
+          onChange={onObjectChange || (() => {})}
+        />
+      ),
       color: 'text-orange-500'
     },
     {
@@ -71,7 +78,7 @@ const ObjectInfo: React.FC<ObjectInfoProps> = ({ object }) => {
       </div>
       <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {infoItems.map((item, index) => (
               <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className={`flex-shrink-0 ${item.color}`}>
@@ -83,7 +90,7 @@ const ObjectInfo: React.FC<ObjectInfoProps> = ({ object }) => {
                 </div>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </div>
     </div>

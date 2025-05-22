@@ -11,26 +11,26 @@ const ObjectDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchObject = async () => {
-      try {
-        setIsLoading(true);
-        const token = localStorage.getItem('jwtToken');
-        const response = await axios.get<Object>(`http://localhost:8080/real-estate-objects/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        setObject(response.data);
-        setError(null);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Ошибка при загрузке объекта');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchObject = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('jwtToken');
+      const response = await axios.get<Object>(`http://localhost:8080/real-estate-objects/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      setObject(response.data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Ошибка при загрузке объекта');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchObject();
   }, [id]);
 
@@ -40,6 +40,7 @@ const ObjectDetails: React.FC = () => {
         object={object}
         isLoading={isLoading}
         error={error}
+        onObjectChange={fetchObject}
       />
     </PageLayout>
   );
