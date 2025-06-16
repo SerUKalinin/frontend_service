@@ -15,6 +15,9 @@ interface TaskListProps {
     tasks: Task[];
     onTaskClick?: (task: Task) => void;
     onStatusChange: (taskId: number, newStatus: string) => void;
+    statusFilter?: string | null;
+    isExpanded: boolean;
+    onToggleExpand: () => void;
 }
 
 type SortableField = 'title' | 'status' | 'createdAt' | 'deadline';
@@ -31,20 +34,25 @@ interface FilterConfig {
     deadline: string;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskClick, onStatusChange }) => {
+const TaskList: React.FC<TaskListProps> = ({ 
+    tasks, 
+    onTaskClick, 
+    onStatusChange, 
+    statusFilter,
+    isExpanded,
+    onToggleExpand
+}) => {
     const [expandedTaskId, setExpandedTaskId] = useState<number | null>(null);
     const [sortConfig, setSortConfig] = useState<SortConfig>({
         key: 'createdAt',
         direction: 'desc'
     });
-
     const [filters, setFilters] = useState<FilterConfig>({
         title: '',
         status: '',
         createdAt: '',
         deadline: ''
     });
-
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
 
     const getStatusColor = (status: string) => {
@@ -185,88 +193,99 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskClick, onStatusChange 
         <div>
             <div className="mb-6 flex justify-between items-center">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Список задач</h2>
+                    <h2 
+                        className="text-lg font-semibold text-gray-900 flex items-center cursor-pointer hover:text-blue-600 transition"
+                        onClick={onToggleExpand}
+                    >
+                        {statusFilter ? `Список задач — ${getStatusLabel(statusFilter)}` : 'Список всех задач'}
+                    </h2>
                     <p className="mt-1 text-sm text-gray-500">
                         Всего задач: {filteredAndSortedTasks.length}
                     </p>
                 </div>
-                <button
-                    onClick={() => setIsFiltersVisible(!isFiltersVisible)}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                    <FunnelIcon className="h-4 w-4 mr-2" />
-                    Фильтры
-                </button>
+                {isExpanded && (
+                    <button
+                        onClick={() => setIsFiltersVisible(!isFiltersVisible)}
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        <FunnelIcon className="h-4 w-4 mr-2" />
+                        Фильтры
+                    </button>
+                )}
             </div>
 
-            <TaskListFilters
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onClearFilters={clearFilters}
-                isVisible={isFiltersVisible}
-            />
+            {isExpanded && (
+                <>
+                    <TaskListFilters
+                        filters={filters}
+                        onFilterChange={handleFilterChange}
+                        onClearFilters={clearFilters}
+                        isVisible={isFiltersVisible}
+                    />
 
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <SortableHeader field="title">
-                                Название
-                            </SortableHeader>
-                            <SortableHeader field="status">
-                                Статус
-                            </SortableHeader>
-                            <SortableHeader field="createdAt">
-                                Дата создания
-                            </SortableHeader>
-                            <SortableHeader field="deadline">
-                                Срок выполнения
-                            </SortableHeader>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Действия
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredAndSortedTasks.map((task) => (
-                            <tr key={task.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <Link
-                                        to={`/tasks/${task.id}`}
-                                        className="text-[#4361ee] hover:text-[#4361ee]/80 underline cursor-pointer"
-                                    >
-                                        {task.title}
-                                    </Link>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status)}`}>
-                                        {getStatusLabel(task.status)}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {new Date(task.createdAt).toLocaleDateString('ru-RU')}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {task.deadline ? new Date(task.deadline).toLocaleDateString('ru-RU') : '-'}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <select
-                                        value={task.status}
-                                        onChange={(e) => onStatusChange(task.id, e.target.value)}
-                                        className="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                                    >
-                                        <option value="NEW">Новая</option>
-                                        <option value="IN_PROGRESS">В работе</option>
-                                        <option value="EXPIRED">Просрочена</option>
-                                        <option value="URGENT">Срочная</option>
-                                        <option value="COMPLETED">Завершена</option>
-                                    </select>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <SortableHeader field="title">
+                                        Название
+                                    </SortableHeader>
+                                    <SortableHeader field="status">
+                                        Статус
+                                    </SortableHeader>
+                                    <SortableHeader field="createdAt">
+                                        Дата создания
+                                    </SortableHeader>
+                                    <SortableHeader field="deadline">
+                                        Срок выполнения
+                                    </SortableHeader>
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Действия
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredAndSortedTasks.map((task) => (
+                                    <tr key={task.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <Link
+                                                to={`/tasks/${task.id}`}
+                                                className="text-[#4361ee] hover:text-[#4361ee]/80 underline cursor-pointer"
+                                            >
+                                                {task.title}
+                                            </Link>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status)}`}>
+                                                {getStatusLabel(task.status)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {new Date(task.createdAt).toLocaleDateString('ru-RU')}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {task.deadline ? new Date(task.deadline).toLocaleDateString('ru-RU') : '-'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <select
+                                                value={task.status}
+                                                onChange={(e) => onStatusChange(task.id, e.target.value)}
+                                                className="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                            >
+                                                <option value="NEW">Новая</option>
+                                                <option value="IN_PROGRESS">В работе</option>
+                                                <option value="EXPIRED">Просрочена</option>
+                                                <option value="URGENT">Срочная</option>
+                                                <option value="COMPLETED">Завершена</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

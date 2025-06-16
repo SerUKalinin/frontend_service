@@ -6,12 +6,16 @@ import PageLayout from '../layout/PageLayout';
 import { authService } from '../../services/authService';
 import AddTaskButton from './AddTaskButton';
 import AddTaskModal from './AddTaskModal';
+import TaskStatusIcons from './TaskStatusIcons';
+import { TaskStatus } from '../common/TaskStatusIcon';
 
 const Tasks: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState<TaskStatus | null>(null);
+    const [isTableExpanded, setIsTableExpanded] = useState(false);
 
     useEffect(() => {
         fetchTasks();
@@ -39,27 +43,31 @@ const Tasks: React.FC = () => {
         }
     };
 
-    const handleStatusChange = async (taskId: number, newStatus: string) => {
-        try {
-            if (!authService.isAuthenticated()) {
-                throw new Error('Требуется авторизация');
-            }
-
-            await api.patch(`/tasks/${taskId}`, { status: newStatus });
-            setTasks(tasks.map(task => 
-                task.id === taskId ? { ...task, status: newStatus as Task['status'] } : task
-            ));
-        } catch (err: any) {
-            console.error('Error updating task status:', err);
-            if (err?.response?.status === 403) {
-                setError('Доступ запрещен. Пожалуйста, войдите в систему.');
-            }
-        }
+    const handleAddTask = (task: Task) => {
+        setTasks(prev => [...prev, task]);
     };
 
-    const handleAddTask = (createdTask: Task) => {
-        setTasks(prev => [...prev, createdTask]);
-        setIsAddModalOpen(false);
+    const handleStatusChange = (taskId: number, newStatus: string) => {
+        setTasks(prevTasks =>
+            prevTasks.map(task =>
+                task.id === taskId ? { ...task, status: newStatus as TaskStatus } : task
+            )
+        );
+    };
+
+    const handleStatusIconClick = (status: TaskStatus) => {
+        setSelectedStatus(prev => {
+            if (prev === status) {
+                setIsTableExpanded(true);
+                return null;
+            }
+            setIsTableExpanded(true);
+            return status;
+        });
+    };
+
+    const handleToggleExpand = () => {
+        setIsTableExpanded(prev => !prev);
     };
 
     if (loading) {
@@ -88,37 +96,44 @@ const Tasks: React.FC = () => {
         );
     }
 
-  return (
-    <PageLayout>
-      <div className="space-y-6">
+    return (
+        <PageLayout>
+            <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-semibold text-gray-900">Задачи</h1>
                     <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
                         <AddTaskButton onClick={() => setIsAddModalOpen(true)} />
                     </div>
                 </div>
-        
-        <div className="bg-white shadow rounded-lg p-6">
-                    {tasks.length === 0 ? (
-                        <div className="text-center text-gray-500 py-8">
-                            Задачи не найдены
-                        </div>
-                    ) : (
-                        <TaskList 
-                            tasks={tasks} 
-                            onStatusChange={handleStatusChange}
-                        />
-                    )}
-        </div>
-      </div>
+
+                <div className="bg-white shadow rounded-lg p-6">
+                    <TaskStatusIcons 
+                        size={96} 
+                        className="mb-8" 
+                        tasks={tasks} 
+                        onStatusClick={handleStatusIconClick}
+                        selectedStatus={selectedStatus}
+                    />
+                </div>
+
+                <div className="bg-white shadow rounded-lg p-6">
+                    <TaskList 
+                        tasks={selectedStatus ? tasks.filter(t => t.status === selectedStatus) : tasks}
+                        onStatusChange={handleStatusChange}
+                        statusFilter={selectedStatus}
+                        isExpanded={isTableExpanded}
+                        onToggleExpand={handleToggleExpand}
+                    />
+                </div>
+            </div>
 
             <AddTaskModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onTaskAdded={handleAddTask}
             />
-    </PageLayout>
-  );
+        </PageLayout>
+    );
 };
 
 export default Tasks; 

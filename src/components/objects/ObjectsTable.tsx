@@ -37,6 +37,7 @@ interface FilterConfig {
 
 const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }) => {
   const navigate = useNavigate();
+  const [isTableCollapsed, setIsTableCollapsed] = useState(true);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     field: 'name',
     direction: 'asc'
@@ -158,193 +159,210 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objects, onEdit, onDelete }
     <div>
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Список объектов недвижимости</h2>
+          <h2 
+            className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-[#4361ee] transition-colors flex items-center"
+            onClick={() => setIsTableCollapsed(!isTableCollapsed)}
+          >
+            Список объектов недвижимости
+            {isTableCollapsed ? (
+              <ChevronDownIcon className="h-5 w-5 ml-2" />
+            ) : (
+              <ChevronUpIcon className="h-5 w-5 ml-2" />
+            )}
+          </h2>
           <p className="mt-1 text-sm text-gray-500">
             Всего объектов: {filteredAndSortedObjects.length}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {isFiltersVisible && Object.values(filters).some(value => value !== '') && (
+        {!isTableCollapsed && (
+          <div className="flex gap-2">
+            {isFiltersVisible && Object.values(filters).some(value => value !== '') && (
+              <button
+                onClick={clearFilters}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <XMarkIcon className="h-5 w-5 mr-2" />
+                Очистить фильтры
+              </button>
+            )}
             <button
-              onClick={clearFilters}
+              onClick={() => setIsFiltersVisible(!isFiltersVisible)}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              <XMarkIcon className="h-5 w-5 mr-2" />
-              Очистить фильтры
+              <FunnelIcon className="h-5 w-5 mr-2" />
+              {isFiltersVisible ? 'Скрыть фильтры' : 'Показать фильтры'}
+              {Object.values(filters).some(value => value !== '') && (
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                  Активны
+                </span>
+              )}
             </button>
-          )}
-          <button
-            onClick={() => setIsFiltersVisible(!isFiltersVisible)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <FunnelIcon className="h-5 w-5 mr-2" />
-            {isFiltersVisible ? 'Скрыть фильтры' : 'Показать фильтры'}
-            {Object.values(filters).some(value => value !== '') && (
-              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                Активны
-              </span>
-            )}
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Панель фильтров с анимацией */}
-      <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isFiltersVisible ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div>
-              <label htmlFor="nameFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                Название
-              </label>
-              <input
-                type="text"
-                id="nameFilter"
-                value={filters.name}
-                onChange={(e) => handleFilterChange('name', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Поиск по названию..."
-              />
-            </div>
-            <div>
-              <label htmlFor="typeFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                Тип объекта
-              </label>
-              <input
-                type="text"
-                id="typeFilter"
-                value={filters.objectType}
-                onChange={(e) => handleFilterChange('objectType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Поиск по типу..."
-              />
-            </div>
-            <div>
-              <label htmlFor="createdByFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                Создатель
-              </label>
-              <input
-                type="text"
-                id="createdByFilter"
-                value={filters.createdBy}
-                onChange={(e) => handleFilterChange('createdBy', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Поиск по создателю..."
-              />
-            </div>
-            <div>
-              <label htmlFor="responsibleFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                Ответственный
-              </label>
-              <input
-                type="text"
-                id="responsibleFilter"
-                value={filters.responsibleUser}
-                onChange={(e) => handleFilterChange('responsibleUser', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Поиск по ответственному..."
-              />
-            </div>
-            <div>
-              <label htmlFor="dateFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                Дата создания
-              </label>
-              <input
-                type="text"
-                id="dateFilter"
-                value={filters.createdAt}
-                onChange={(e) => handleFilterChange('createdAt', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Поиск по дате..."
-              />
-            </div>
-            <div>
-              <label htmlFor="parentFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                Родительский объект
-              </label>
-              <select
-                id="parentFilter"
-                value={filters.parentId}
-                onChange={(e) => handleFilterChange('parentId', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="">Выберите родительский объект</option>
-                {objects.map(obj => (
-                  <option key={obj.id} value={obj.id}>
-                    {obj.name}
-                  </option>
-                ))}
-              </select>
+      {/* Панель фильтров */}
+      {!isTableCollapsed && isFiltersVisible && (
+        <div className="mb-6 transition-all duration-300 ease-in-out">
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div>
+                <label htmlFor="nameFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Название
+                </label>
+                <input
+                  type="text"
+                  id="nameFilter"
+                  value={filters.name}
+                  onChange={(e) => handleFilterChange('name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Поиск по названию..."
+                />
+              </div>
+              <div>
+                <label htmlFor="typeFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Тип объекта
+                </label>
+                <input
+                  type="text"
+                  id="typeFilter"
+                  value={filters.objectType}
+                  onChange={(e) => handleFilterChange('objectType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Поиск по типу..."
+                />
+              </div>
+              <div>
+                <label htmlFor="createdByFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Создатель
+                </label>
+                <input
+                  type="text"
+                  id="createdByFilter"
+                  value={filters.createdBy}
+                  onChange={(e) => handleFilterChange('createdBy', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Поиск по создателю..."
+                />
+              </div>
+              <div>
+                <label htmlFor="responsibleFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Ответственный
+                </label>
+                <input
+                  type="text"
+                  id="responsibleFilter"
+                  value={filters.responsibleUser}
+                  onChange={(e) => handleFilterChange('responsibleUser', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Поиск по ответственному..."
+                />
+              </div>
+              <div>
+                <label htmlFor="dateFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Дата создания
+                </label>
+                <input
+                  type="text"
+                  id="dateFilter"
+                  value={filters.createdAt}
+                  onChange={(e) => handleFilterChange('createdAt', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Поиск по дате..."
+                />
+              </div>
+              <div>
+                <label htmlFor="parentFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Родительский объект
+                </label>
+                <select
+                  id="parentFilter"
+                  value={filters.parentId}
+                  onChange={(e) => handleFilterChange('parentId', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Выберите родительский объект</option>
+                  {objects.map(obj => (
+                    <option key={obj.id} value={obj.id}>
+                      {obj.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <SortableHeader field="name">
-                Название
-              </SortableHeader>
-              <SortableHeader field="objectType">
-                Тип объекта
-              </SortableHeader>
-              <SortableHeader field="createdBy">
-                Создатель
-              </SortableHeader>
-              <SortableHeader field="responsibleUser">
-                Ответственный
-              </SortableHeader>
-              <SortableHeader field="createdAt">
-                Дата создания
-              </SortableHeader>
-              <SortableHeader field="parentId">
-                Родительский объект
-              </SortableHeader>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Действия
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredAndSortedObjects.map((object) => (
-              <tr 
-                key={object.id} 
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => handleRowClick(object)}
-              >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <span className="text-[#4361ee] hover:text-[#4361ee]/80">
-                    {object.name}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {getObjectTypeName(object.objectType)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {`${object.createdByFirstName} ${object.createdByLastName}`}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {object.responsibleUserFirstName && object.responsibleUserLastName
-                    ? `${object.responsibleUserFirstName} ${object.responsibleUserLastName}`
-                    : 'Не назначен'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(object.createdAt).toLocaleDateString('ru-RU')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {object.parentId ? objects.find(obj => obj.id === object.parentId)?.name || 'Неизвестно' : '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <EditButton object={object} onEdit={onEdit} />
-                    <DeleteButton object={object} onDelete={onDelete} />
-                  </div>
-                </td>
+      {/* Таблица */}
+      <div className={`transition-all duration-300 ease-in-out ${isTableCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-[2000px]'}`}>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <SortableHeader field="name">
+                  Название
+                </SortableHeader>
+                <SortableHeader field="objectType">
+                  Тип объекта
+                </SortableHeader>
+                <SortableHeader field="createdBy">
+                  Создатель
+                </SortableHeader>
+                <SortableHeader field="responsibleUser">
+                  Ответственный
+                </SortableHeader>
+                <SortableHeader field="createdAt">
+                  Дата создания
+                </SortableHeader>
+                <SortableHeader field="parentId">
+                  Родительский объект
+                </SortableHeader>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Действия
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredAndSortedObjects.map((object) => (
+                <tr 
+                  key={object.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleRowClick(object)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <span className="text-[#4361ee] hover:text-[#4361ee]/80">
+                      {object.name}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {getObjectTypeName(object.objectType)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {`${object.createdByFirstName} ${object.createdByLastName}`}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {object.responsibleUserFirstName && object.responsibleUserLastName
+                      ? `${object.responsibleUserFirstName} ${object.responsibleUserLastName}`
+                      : 'Не назначен'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(object.createdAt).toLocaleDateString('ru-RU')}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {object.parentId ? objects.find(obj => obj.id === object.parentId)?.name || 'Неизвестно' : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <EditButton object={object} onEdit={onEdit} />
+                      <DeleteButton object={object} onDelete={onDelete} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

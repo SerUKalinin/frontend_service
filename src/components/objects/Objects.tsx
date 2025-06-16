@@ -9,6 +9,7 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import AddObjectModal from './AddObjectModal';
 import EditObjectModal from './EditObjectModal';
 import DeleteObjectModal from './DeleteObjectModal';
+import BuildingsGrid from './BuildingsGrid';
 
 const Objects: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -118,6 +119,9 @@ const Objects: React.FC = () => {
     setIsDeleteModalOpen(true);
   };
 
+  // Фильтруем объекты типа "Здание"
+  const buildingObjects = objects.filter(obj => obj.objectType === 'BUILDING');
+
   if (isLoading) {
     return (
       <PageLayout>
@@ -160,6 +164,9 @@ const Objects: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Секция с иконками зданий */}
+        <BuildingsGrid buildings={buildingObjects} />
         
         <div className="bg-white shadow rounded-lg p-6">
           {objects.length === 0 ? (

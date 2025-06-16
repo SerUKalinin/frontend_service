@@ -4,6 +4,7 @@ import { api } from '../../services/api';
 import TaskInfo from './TaskInfo';
 import TaskAttachmentsPanel from './TaskAttachmentsPanel';
 import TaskCommentsPanel from './TaskCommentsPanel';
+import PageLayout from '../layout/PageLayout';
 
 interface Task {
     id: number;
@@ -73,22 +74,24 @@ const TaskDetailsPage: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-col lg:flex-row gap-6">
-                <div className="lg:w-2/3">
-                    <TaskInfo task={task} onTaskChange={fetchTask} />
-                </div>
-                <div className="lg:w-1/3 space-y-6">
-                    <TaskAttachmentsPanel 
-                        taskId={task.id} 
-                        onFilesChanged={handleFilesChanged}
-                    />
-                    <TaskCommentsPanel 
-                        taskId={task.id} 
-                    />
+        <PageLayout>
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="lg:w-2/3">
+                        <TaskInfo task={task} onTaskChange={fetchTask} />
+                    </div>
+                    <div className="lg:w-1/3 space-y-6">
+                        <TaskAttachmentsPanel 
+                            taskId={task.id} 
+                            onFilesChanged={handleFilesChanged}
+                        />
+                        <TaskCommentsPanel 
+                            taskId={task.id} 
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </PageLayout>
     );
 };
 
